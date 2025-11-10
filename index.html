@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Products Preview</title>
+</head>
+<body style="font-family:'Inter',sans-serif;margin:0;padding:0;display:flex;justify-content:center;min-height:100vh;">
+  <div style="width:900px;margin-top:40px;background:white;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.2);overflow:hidden;">
+    
+    <!-- Header -->
+    <div style="position:relative;background:url('https://d37ec3di8bduyh.cloudfront.net/portal/default/img/header.svg') center/cover no-repeat;height:70px;display:flex;align-items:center;background-color:#237803;justify-content:flex-start;padding-left:24px;">
+      <img src="https://s3.eu-central-1.amazonaws.com/euc-cdn.freshdesk.com/data/helpdesk/attachments/production/76042127662/logo/kAvkfKrV4ZdEZZ0skKSgxq0Y_Ea1w9bI5Q.png" 
+           alt="Header Logo" 
+           style="height:40px;object-fit:contain;">
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;justify-content:flex-start;color:#237803;">
+      <div id="tab-products" style="padding:16px 24px;cursor:pointer;font-weight:600;background-color:#f1f5f9;border-bottom:3px solid #237803;">Products</div>
+      <div id="tab-banners" style="padding:16px 24px;cursor:pointer;font-weight:600;">Banners</div>
+    </div>
+    <hr>
+    
+    <!-- Content -->
+    <div id="productsContent" style="padding:24px;">
+      <div style="margin-bottom:24px;">
+        <label for="idInput" style="display:block;font-weight:600;color:#374151;margin-bottom:6px;">Id</label>
+        <input id="idInput" type="text" placeholder="" style="padding:10px;width:250px;border:1px solid #d1d5db;border-radius:8px;outline:none;">
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label for="numProducts" style="display:block;font-weight:600;color:#374151;margin-bottom:6px;">Number of products</label>
+        <select id="numProducts" style="padding:10px;width:150px;border:1px solid #d1d5db;border-radius:8px;">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+
+      <!-- Accordion Container -->
+      <div id="accordionContainer" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+      <!-- Add Section -->
+      <div style="display:flex;gap:12px;margin-top:20px;align-items:center;">
+        <select id="sectionDropdown" style="padding:10px;width:150px;border:1px solid #d1d5db;border-radius:8px;">
+          <option value="zooplus.de">zooplus.de(1)</option>
+          <option value="zooplus.com">zooplus.com(2)</option>
+          <option value="zooplus.uk">zooplus.uk(3)</option>
+        </select>
+        <button id="addAccordion" style="padding:10px 20px;background-color:#237803;color:white;font-weight:600;border:none;border-radius:8px;cursor:pointer;">
+          + Add Site
+        </button>
+      </div>
+    </div>
+
+    <div id="bannersContent" style="display:none;padding:24px;">
+      <div style="font-size:18px;color:#6b7280;">TBD: Content for Banners</div>
+    </div>
+
+  </div>
+
+  <script>
+    const container = document.getElementById('accordionContainer');
+    const addBtn = document.getElementById('addAccordion');
+    const numProductsSelect = document.getElementById('numProducts');
+    const productsContent = document.getElementById('productsContent');
+    const bannersContent = document.getElementById('bannersContent');
+    const tabProducts = document.getElementById('tab-products');
+    const tabBanners = document.getElementById('tab-banners');
+    const sectionDropdown = document.getElementById('sectionDropdown');
+    
+    // Switch Tabs
+    function switchTab(tab) {
+      if (tab === 'products') {
+        productsContent.style.display = 'block';
+        bannersContent.style.display = 'none';
+        tabProducts.style.backgroundColor = '#f1f5f9';
+        tabProducts.style.borderBottom = '3px solid #237803';
+        tabBanners.style.backgroundColor = 'transparent';
+        tabBanners.style.borderBottom = 'none';
+      } else {
+        productsContent.style.display = 'none';
+        bannersContent.style.display = 'block';
+        tabBanners.style.backgroundColor = '#f1f5f9';
+        tabBanners.style.borderBottom = '3px solid #237803';
+        tabProducts.style.backgroundColor = 'transparent';
+        tabProducts.style.borderBottom = 'none';
+      }
+    }
+    switchTab('products');
+    tabProducts.onclick = () => switchTab('products');
+    tabBanners.onclick = () => switchTab('banners');
+
+    // Create Accordion
+    function createAccordion(sectionName) {
+      const accordion = document.createElement('div');
+      accordion.style.border = '1px solid #e5e7eb';
+      accordion.style.borderRadius = '10px';
+      accordion.style.overflow = 'hidden';
+      accordion.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+      accordion.style.background = 'white';
+
+      const header = document.createElement('div');
+      header.style.background = '#f9fafb';
+      header.style.padding = '12px 16px';
+      header.style.fontWeight = '600';
+      header.style.cursor = 'pointer';
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+      header.textContent = sectionName;
+
+      const arrow = document.createElement('span');
+      arrow.innerHTML = '▼';
+      arrow.style.transition = 'transform 0.3s ease';
+      header.appendChild(arrow);
+
+      const content = document.createElement('div');
+      content.style.display = 'none';
+      content.style.padding = '16px';
+
+      const inputsWrapper = document.createElement('div');
+      const fallbackWrapper = document.createElement('div');
+      fallbackWrapper.style.marginTop = '20px';
+
+      const previewWrapper = document.createElement('div');
+      previewWrapper.style.marginTop = '20px';
+
+      function renderInputs() {
+        inputsWrapper.innerHTML = '';
+        previewWrapper.innerHTML = '';
+        const num = parseInt(numProductsSelect.value);
+
+        for (let i = 0; i < num; i++) {
+          const label = document.createElement('label');
+          label.textContent = 'Product ' + (i + 1);
+          label.style.display = 'block';
+          label.style.marginTop = '14px';
+          label.style.marginBottom = '4px';
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.style.width = '100%';
+          input.style.padding = '8px';
+          input.style.border = '1px solid #d1d5db';
+          input.style.borderRadius = '6px';
+
+          inputsWrapper.appendChild(label);
+          inputsWrapper.appendChild(input);
+        }
+      }
+
+      renderInputs();
+
+      // ✅ ADD FALLBACK BUTTON
+      const fallbackBtn = document.createElement('button');
+      fallbackBtn.textContent = 'Add Fallback Products';
+      fallbackBtn.style.padding = '8px 16px';
+      fallbackBtn.style.backgroundColor = '#4b5563';
+      fallbackBtn.style.color = 'white';
+      fallbackBtn.style.fontWeight = '600';
+      fallbackBtn.style.border = 'none';
+      fallbackBtn.style.borderRadius = '8px';
+      fallbackBtn.style.marginTop = '12px';
+      fallbackBtn.style.cursor = 'pointer';
+
+      fallbackBtn.onclick = () => {
+			const current = fallbackWrapper.querySelectorAll('input').length;
+
+			// Stop if already 2 fallback products
+			if (current >= 2) return;
+
+			// Add ONE fallback product each click
+			const label = document.createElement('label');
+			label.textContent = 'Fallback Product ' + (current + 1);
+			label.style.display = 'block';
+			label.style.marginTop = '14px';
+			label.style.marginBottom = '4px';
+
+			const input = document.createElement('input');
+			input.type = 'text';
+			input.style.width = '100%';
+			input.style.padding = '8px';
+			input.style.border = '1px solid #d1d5db';
+			input.style.borderRadius = '6px';
+
+			fallbackWrapper.appendChild(label);
+			fallbackWrapper.appendChild(input);
+
+			// Disable button only when max (2) reached
+			if (current + 1 >= 2) {
+				fallbackBtn.disabled = true;
+				fallbackBtn.style.opacity = '0.5';
+				fallbackBtn.style.cursor = 'not-allowed';
+			}
+		};
+
+      // ✅ Preview Button
+      const previewBtn = document.createElement('button');
+      previewBtn.textContent = 'Preview';
+      previewBtn.style.padding = '8px 16px';
+      previewBtn.style.backgroundColor = '#237803';
+      previewBtn.style.color = 'white';
+      previewBtn.style.fontWeight = '600';
+      previewBtn.style.border = 'none';
+      previewBtn.style.borderRadius = '8px';
+      previewBtn.style.marginTop = '12px';
+      previewBtn.style.cursor = 'pointer';
+      previewBtn.onclick = () => updatePreview(previewWrapper, inputsWrapper);
+
+      content.appendChild(inputsWrapper);
+      content.appendChild(previewBtn);
+      content.appendChild(fallbackBtn);
+      content.appendChild(fallbackWrapper);
+      content.appendChild(previewWrapper);
+      accordion.appendChild(header);
+      accordion.appendChild(content);
+      container.appendChild(accordion);
+
+      header.onclick = () => {
+        const isOpen = content.style.display !== 'none';
+        content.style.display = isOpen ? 'none' : 'block';
+        arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+      };
+    }
+
+    // Update Preview
+    function updatePreview(previewWrapper, inputsWrapper) {
+      const inputs = Array.from(inputsWrapper.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+      const num = parseInt(numProductsSelect.value);
+
+      previewWrapper.innerHTML = '';
+
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = num === 1 ? '1fr' : 'repeat(2, 1fr)';
+      grid.style.gap = '16px';
+
+      inputs.forEach(id => {
+        const card = document.createElement('div');
+        card.style.border = '1px solid #e5e7eb';
+        card.style.borderRadius = '10px';
+        card.style.padding = '12px';
+        card.style.background = 'white';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'center';
+        card.style.textAlign = 'center';
+        card.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+
+        const badge = document.createElement('div');
+        badge.textContent = '-15% Reducere';
+        badge.style.background = '#facc15';
+        badge.style.color = '#111827';
+        badge.style.fontWeight = '600';
+        badge.style.fontSize = '13px';
+        badge.style.padding = '2px 8px';
+        badge.style.borderRadius = '12px';
+        badge.style.marginBottom = '8px';
+
+        const img = document.createElement('img');
+        img.src = 'https://media.zooplus.com/bilder/4/400/465703_pla_royalcanin_mini_adult_geflugel_rind_schwein_hs_01_4.jpg?width=400&format=webp';
+        img.alt = 'product';
+        img.style.width = '80px';
+        img.style.height = '80px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        img.style.marginBottom = '10px';
+
+        const name = document.createElement('div');
+        name.textContent = id;
+        name.style.fontWeight = '600';
+        name.style.marginBottom = '6px';
+
+        const desc = document.createElement('div');
+        desc.textContent = 'Descriere scurtă a produsului';
+        desc.style.color = '#6b7280';
+        desc.style.fontSize = '14px';
+        desc.style.marginBottom = '8px';
+
+        const oldPrice = document.createElement('div');
+        oldPrice.textContent = 'Preț inițial: ' + (Math.random() * 50 + 10).toFixed(2) + ' €';
+        oldPrice.style.textDecoration = 'line-through';
+        oldPrice.style.color = '#9ca3af';
+        oldPrice.style.fontSize = '14px';
+
+        const newPrice = document.createElement('div');
+        newPrice.textContent = 'Preț redus: ' + (Math.random() * 40 + 5).toFixed(2) + ' €';
+        newPrice.style.color = '#16a34a';
+        newPrice.style.fontWeight = '700';
+        newPrice.style.fontSize = '18px';
+
+        const perKg = document.createElement('div');
+        perKg.textContent = 'Preț / kg: ' + (Math.random() * 8 + 1).toFixed(2) + ' €';
+        perKg.style.color = '#6b7280';
+        perKg.style.fontSize = '13px';
+
+        card.appendChild(badge);
+        card.appendChild(img);
+        card.appendChild(name);
+        card.appendChild(desc);
+        card.appendChild(oldPrice);
+        card.appendChild(newPrice);
+        card.appendChild(perKg);
+
+        grid.appendChild(card);
+      });
+
+      previewWrapper.appendChild(grid);
+    }
+
+    addBtn.onclick = () => {
+      createAccordion(`${sectionDropdown.value}`);
+    };
+  </script>
+</body>
+</html>
