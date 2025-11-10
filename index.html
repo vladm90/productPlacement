@@ -13,6 +13,13 @@
            alt="Header Logo" 
            style="height:40px;object-fit:contain;">
     </div>
+	<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;">
+      <h2 style="color:#237803;margin:0;">Add new configuration</h2>
+      <a href="allsaved.html" 
+         style="background:#237803;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:500;">
+         Home
+      </a>
+    </div>
 
     <!-- Tabs -->
     <div style="display:flex;justify-content:flex-start;color:#237803;">
@@ -52,6 +59,10 @@
         </select>
         <button id="addAccordion" style="padding:10px 20px;background-color:#237803;color:white;font-weight:600;border:none;border-radius:8px;cursor:pointer;">
           + Add Site
+        </button>
+		
+		 <button id="save" style="padding:10px 20px;background-color:#237803;color:white;font-weight:600;border:none;border-radius:8px;cursor:pointer;">
+          Save
         </button>
       </div>
     </div>
@@ -94,6 +105,8 @@
     tabProducts.onclick = () => switchTab('products');
     tabBanners.onclick = () => switchTab('banners');
 
+
+	  
     // Create Accordion
     function createAccordion(sectionName) {
       const accordion = document.createElement('div');
