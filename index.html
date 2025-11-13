@@ -13,6 +13,7 @@
            alt="Header Logo" 
            style="height:40px;object-fit:contain;">
     </div>
+
 	<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;">
       <h2 style="color:#237803;margin:0;">Add new configuration</h2>
       <a href="allsaved.html" 
@@ -61,16 +62,21 @@
           + Add Site
         </button>
 		
-		 <button id="save" style="padding:10px 20px;background-color:#237803;color:white;font-weight:600;border:none;border-radius:8px;cursor:pointer;">
+		<button id="save" style="padding:10px 20px;background-color:#237803;color:white;font-weight:600;border:none;border-radius:8px;cursor:pointer;">
           Save
         </button>
+      </div>
+
+      <!-- Braze Code Output -->
+      <div style="margin-top:30px;">
+        <label for="brazeCode" style="display:block;font-weight:600;color:#374151;margin-bottom:6px;">Braze code</label>
+        <textarea id="brazeCode" readonly style="width:50%;height:50px;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-family:monospace;"></textarea>
       </div>
     </div>
 
     <div id="bannersContent" style="display:none;padding:24px;">
       <div style="font-size:18px;color:#6b7280;">TBD: Content for Banners</div>
     </div>
-
   </div>
 
   <script>
@@ -82,7 +88,9 @@
     const tabProducts = document.getElementById('tab-products');
     const tabBanners = document.getElementById('tab-banners');
     const sectionDropdown = document.getElementById('sectionDropdown');
-    
+    const idInput = document.getElementById('idInput');
+    const brazeCode = document.getElementById('brazeCode');
+
     // Switch Tabs
     function switchTab(tab) {
       if (tab === 'products') {
@@ -105,9 +113,17 @@
     tabProducts.onclick = () => switchTab('products');
     tabBanners.onclick = () => switchTab('banners');
 
+    // Update Braze code automatically
+    idInput.addEventListener('input', () => {
+      const val = idInput.value.trim();
+      if (val) {
+        brazeCode.value = `{% assign placement_id = '${val}' %}\n{% include "placement_content_block" %}`;
+      } else {
+        brazeCode.value = '';
+      }
+    });
 
-	  
-    // Create Accordion
+    // Accordion
     function createAccordion(sectionName) {
       const accordion = document.createElement('div');
       accordion.style.border = '1px solid #e5e7eb';
@@ -168,7 +184,6 @@
 
       renderInputs();
 
-      // ✅ ADD FALLBACK BUTTON
       const fallbackBtn = document.createElement('button');
       fallbackBtn.textContent = 'Add Fallback Products';
       fallbackBtn.style.padding = '8px 16px';
@@ -181,37 +196,32 @@
       fallbackBtn.style.cursor = 'pointer';
 
       fallbackBtn.onclick = () => {
-			const current = fallbackWrapper.querySelectorAll('input').length;
+        const current = fallbackWrapper.querySelectorAll('input').length;
+        if (current >= 2) return;
 
-			// Stop if already 2 fallback products
-			if (current >= 2) return;
+        const label = document.createElement('label');
+        label.textContent = 'Fallback Product ' + (current + 1);
+        label.style.display = 'block';
+        label.style.marginTop = '14px';
+        label.style.marginBottom = '4px';
 
-			// Add ONE fallback product each click
-			const label = document.createElement('label');
-			label.textContent = 'Fallback Product ' + (current + 1);
-			label.style.display = 'block';
-			label.style.marginTop = '14px';
-			label.style.marginBottom = '4px';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.border = '1px solid #d1d5db';
+        input.style.borderRadius = '6px';
 
-			const input = document.createElement('input');
-			input.type = 'text';
-			input.style.width = '100%';
-			input.style.padding = '8px';
-			input.style.border = '1px solid #d1d5db';
-			input.style.borderRadius = '6px';
+        fallbackWrapper.appendChild(label);
+        fallbackWrapper.appendChild(input);
 
-			fallbackWrapper.appendChild(label);
-			fallbackWrapper.appendChild(input);
+        if (current + 1 >= 2) {
+          fallbackBtn.disabled = true;
+          fallbackBtn.style.opacity = '0.5';
+          fallbackBtn.style.cursor = 'not-allowed';
+        }
+      };
 
-			// Disable button only when max (2) reached
-			if (current + 1 >= 2) {
-				fallbackBtn.disabled = true;
-				fallbackBtn.style.opacity = '0.5';
-				fallbackBtn.style.cursor = 'not-allowed';
-			}
-		};
-
-      // ✅ Preview Button
       const previewBtn = document.createElement('button');
       previewBtn.textContent = 'Preview';
       previewBtn.style.padding = '8px 16px';
@@ -240,7 +250,6 @@
       };
     }
 
-    // Update Preview
     function updatePreview(previewWrapper, inputsWrapper) {
       const inputs = Array.from(inputsWrapper.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
       const num = parseInt(numProductsSelect.value);
